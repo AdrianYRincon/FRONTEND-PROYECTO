@@ -1,6 +1,9 @@
-// ModalVehiculos.jsx
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import Alerta from "./Alerta";
+import Axios from "axios";
+import Swal from "sweetalert2";
+
 
 type Vehiculo = {
   placa: string;
@@ -10,7 +13,20 @@ type Vehiculo = {
   marca: string;
 };
 
-const ModalVehiculos = ({ agregarVehiculo }: { agregarVehiculo: (vehiculo: Vehiculo) => void }) => {
+const ModalVehiculos = ({  
+  editar,
+  setEditar,
+  selectedVehicle,
+  getVehicles
+
+}: { 
+  editar: boolean ,
+  setEditar: Function,
+  selectedVehicle : Vehiculo | null
+  getVehicles: Function 
+
+}) => {
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [placa, setPlaca] = useState<string>("");
@@ -24,7 +40,30 @@ const ModalVehiculos = ({ agregarVehiculo }: { agregarVehiculo: (vehiculo: Vehic
     error: false,
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(()=>{
+    if (editar && selectedVehicle) {
+      setIsOpen(true);
+      setPlaca(selectedVehicle.placa);
+      setCedula(selectedVehicle.cedula);
+      setKilometraje(selectedVehicle.kilometraje);
+      setFechaUltimaRevision(selectedVehicle.fechaUltimaRevision);
+      setMarca(selectedVehicle.marca);
+    }
+  },[editar, selectedVehicle])
+
+
+  const resetForm = ()=>{
+    setPlaca("");
+    setCedula("");
+    setKilometraje(0);
+    setFechaUltimaRevision("");
+    setMarca("");
+
+  }
+
+
+
+  const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if ([placa, cedula, fechaUltimaRevision, marca].includes("")) {
@@ -35,22 +74,77 @@ const ModalVehiculos = ({ agregarVehiculo }: { agregarVehiculo: (vehiculo: Vehic
       return;
     }
 
+    if(!editar){
+      //intentamos agregar un nuevo vehiculo
+      try {
+        await Axios.post("http://localhost:3001/insertvehicle",{
+          placa,
+          cedula,
+          kilometraje,
+          fechaUltimaRevision,
+          marca
+        });
+
+        getVehicles();
+  
+        Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Vehiculo Agregado correctamente",
+        showConfirmButton: false,
+        timer: 2000
+        });
+        
+      } catch (error:any) {
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.response.data,
+        });
+      }
+  
+    }
+    else {
+      //intentamos actualizar un vehiculo
+      try {
+        await Axios.put("http://localhost:3001/updatevehicle",{
+          placa,
+          cedula,
+          kilometraje,
+          fechaUltimaRevision,
+          marca
+        });
+
+        getVehicles();
+  
+        Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Vehiculo actualizado correctamente",
+        showConfirmButton: false,
+        timer: 2000
+        });
+        
+      } catch (error:any) {
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.response.data,
+        });
+      }
+  
+
+    }
+
+    setIsOpen(false);
+    setEditar(false);
+    resetForm();
     setAlerta({
       msg: "",
       error: false,
     });
-
-    const nuevoVehiculo = {
-      placa,
-      cedula,
-      kilometraje,
-      fechaUltimaRevision,
-      marca,
-    };
-
-    agregarVehiculo(nuevoVehiculo);
-
-    setIsOpen(false);
   };
 
   const { msg } = alerta;
@@ -67,7 +161,11 @@ const ModalVehiculos = ({ agregarVehiculo }: { agregarVehiculo: (vehiculo: Vehic
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center"
-          onClick={() => setIsOpen(false)}
+          onClick={() => {
+            setIsOpen(false);
+            setEditar(false);
+            resetForm();
+          }}
         >
           <div
             className="bg-white p-6 md:py-18 rounded shadow-lg flex flex-col justify-center items-center gap-5 w-1/2"
@@ -83,6 +181,7 @@ const ModalVehiculos = ({ agregarVehiculo }: { agregarVehiculo: (vehiculo: Vehic
                   className="border w-full p-3 mt-2 bg-gray-50 rounded px-4"
                   value={placa}
                   onChange={(e) => setPlaca(e.target.value)}
+                  disabled = { editar }
                 />
               </div>
               <div className="my-5">
@@ -130,8 +229,8 @@ const ModalVehiculos = ({ agregarVehiculo }: { agregarVehiculo: (vehiculo: Vehic
              
               <input
                 type="submit"
-                value="Agregar"
-                className="bg-indigo-700 w-full py-2 px-2 rounded text-white uppercase font-bold mt-5 hover:bg-indigo-800 cursor-pointer"
+                value={editar ? "Actualizar": "Agregar"}
+                className={editar ? "bg-cyan-500 w-full py-2 px-2 rounded text-white uppercase font-bold mt-5 hover:bg-cyan-700 cursor-pointer": "bg-indigo-700 w-full py-2 px-2 rounded text-white uppercase font-bold mt-5 hover:bg-indigo-800 cursor-pointer"}
               />
             </form>
           </div>

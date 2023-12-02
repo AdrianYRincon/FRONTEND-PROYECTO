@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Alerta from "./Alerta";
-
+import Axios from "axios";
+import Swal from "sweetalert2";
 
 type Cliente = {
   cedula:string;
@@ -10,7 +11,17 @@ type Cliente = {
   telefono:string;
 
 } 
-const ModalClients = ({ addCliente }: { addCliente: (cliente: Cliente) => void }) => {
+const ModalClients = ({ 
+  editar,
+  selectedClient,
+  setEditar,
+  getClientes
+ }: { 
+  editar: boolean ,
+  selectedClient : Cliente | null,
+  setEditar: Function,
+  getClientes: Function
+ }) => {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -26,9 +37,28 @@ const ModalClients = ({ addCliente }: { addCliente: (cliente: Cliente) => void }
     error: false,
   });
 
+  useEffect(()=>{
+    if (editar && selectedClient) {
+      setIsOpen(true);
+      setCedula(selectedClient.cedula);
+      setNombre(selectedClient.nombre);
+      setApellido(selectedClient.apellido);
+      setEmail(selectedClient.email);
+      setTelefono(selectedClient.telefono);
+    }
+  },[editar, selectedClient])
+
+  const resetForm = ()=>{
+    setCedula("");
+    setNombre("");
+    setApellido("");
+    setEmail("");
+    setTelefono("");
+
+  }
 
 
-  const handleSubmit = (e:React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async(e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if ([cedula,nombre,apellido,email,telefono].includes('')) {
@@ -39,24 +69,78 @@ const ModalClients = ({ addCliente }: { addCliente: (cliente: Cliente) => void }
       return;
     }
 
+    if(!editar){
+      //intentamos agregar un nuevo cliente
+      try {
+        await Axios.post("http://localhost:3001/insertClient",{
+          cedula,
+          nombre,
+          apellido,
+          email,
+          telefono
+        });
+
+        getClientes();
+  
+        Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Cliente Agregado correctamente",
+        showConfirmButton: false,
+        timer: 2000
+        });
+        
+      } catch (error:any) {
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.response.data,
+        });
+      }
+  
+    }
+    else {
+      //intentamos actualizar un cliente
+      try {
+        await Axios.put("http://localhost:3001/updateClient",{
+          cedula,
+          nombre,
+          apellido,
+          email,
+          telefono
+        });
+
+        getClientes();
+  
+        Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Cliente actualizado correctamente",
+        showConfirmButton: false,
+        timer: 2000
+        });
+        
+      } catch (error:any) {
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.response.data,
+        });
+      }
+  
+    }
+
+
     setAlerta({
-      msg: '',
+      msg: "",
       error: false,
     });
 
-    // Crear un objeto con la información del servicio
-    const nuevoCliente = {
-      cedula,
-      nombre,
-      apellido,
-      email,
-      telefono
-    };
-
-    // Llamar a la función de callback del componente padre (AdminServicios)
-    addCliente(nuevoCliente);
-
+    resetForm();
     setIsOpen(false);
+    setEditar(false);
   };
 
 
@@ -74,7 +158,11 @@ const ModalClients = ({ addCliente }: { addCliente: (cliente: Cliente) => void }
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center"
-          onClick={() => setIsOpen(false)}
+          onClick={() => {
+            setIsOpen(false);
+            setEditar(false);
+            resetForm();
+          }}
         >
           <div
             className="bg-white p-6 md:py-18 rounded shadow-lg flex flex-col justify-center items-center gap-5 w-1/2"
@@ -92,6 +180,7 @@ const ModalClients = ({ addCliente }: { addCliente: (cliente: Cliente) => void }
                   className="border w-full p-3 mt-2 bg-gray-50 rounded px-4"
                   value={cedula}
                   onChange={(e) => setCedula(e.target.value)}
+                  disabled = { editar }
                 />
               </div>
               <div className="my-5">
@@ -145,9 +234,9 @@ const ModalClients = ({ addCliente }: { addCliente: (cliente: Cliente) => void }
 
               <input
                 type="submit"
-                value="Agregar"
-                className="bg-indigo-700 w-full py-2 px-2 rounded text-white uppercase font-bold mt-5 hover:bg-indigo-800 cursor-pointer"
-              />
+                value={editar ? "Actualizar": "Agregar"}
+                className={editar ? "bg-cyan-500 w-full py-2 px-2 rounded text-white uppercase font-bold mt-5 hover:bg-cyan-700 cursor-pointer": "bg-indigo-700 w-full py-2 px-2 rounded text-white uppercase font-bold mt-5 hover:bg-indigo-800 cursor-pointer"}
+                />
             </form>
           </div>
         </div>

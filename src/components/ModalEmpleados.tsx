@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Alerta from "./Alerta";
+import Axios from "axios";
+import Swal from "sweetalert2";
 
 type Empleado = {
   cedula: string;
@@ -8,7 +10,19 @@ type Empleado = {
   sueldo: number;
 };
 
-const ModalEmpleados = ({ agregarEmpleado }: { agregarEmpleado: (empleado: Empleado) => void }) => {
+const ModalEmpleados = ({ 
+  editar,
+  setEditar,
+  selectedEmployee,
+  getEmployees
+ }: 
+ {
+  editar: boolean ,
+  setEditar: Function,
+  selectedEmployee : Empleado | null,
+  getEmployees: Function
+
+  }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [cedula, setCedula] = useState<string>("");
@@ -21,7 +35,28 @@ const ModalEmpleados = ({ agregarEmpleado }: { agregarEmpleado: (empleado: Emple
     error: false,
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(()=>{
+    if (editar && selectedEmployee) {
+      setIsOpen(true);
+      setCedula(selectedEmployee.cedula);
+      setNombre(selectedEmployee.nombre);
+      setApellido(selectedEmployee.apellido);
+      setSueldo(selectedEmployee.sueldo);
+
+    }
+  },[editar, selectedEmployee])
+
+
+  const resetForm = ()=>{
+    setCedula("");
+    setNombre("");
+    setApellido("");
+    setSueldo(0);
+
+
+  }
+
+  const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if ([cedula, nombre, apellido, sueldo].includes("")) {
@@ -32,21 +67,76 @@ const ModalEmpleados = ({ agregarEmpleado }: { agregarEmpleado: (empleado: Emple
       return;
     }
 
+    if(!editar){
+      //intentamos agregar un nuevo empleado
+      try {
+        await Axios.post("http://localhost:3001/insertemployee",{
+          cedula,
+          nombre,
+          apellido,
+          sueldo
+        });
+
+        getEmployees();
+  
+        Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Empleado Agregado correctamente",
+        showConfirmButton: false,
+        timer: 2000
+        });
+        
+      } catch (error:any) {
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.response.data,
+        });
+      }
+  
+    }
+    else {
+      //intentamos actualizar un empleado
+      try {
+        await Axios.put("http://localhost:3001/updateemployee",{
+          cedula,
+          nombre,
+          apellido,
+          sueldo
+        });
+
+        getEmployees();
+  
+        Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Empleado actualizado correctamente",
+        showConfirmButton: false,
+        timer: 2000
+        });
+        
+      } catch (error:any) {
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.response.data,
+        });
+      }
+  
+    }
+
+
     setAlerta({
       msg: "",
       error: false,
     });
 
-    const nuevoEmpleado = {
-      cedula,
-      nombre,
-      apellido,
-      sueldo,
-    };
-
-    agregarEmpleado(nuevoEmpleado);
-
+    resetForm();
     setIsOpen(false);
+    setEditar(false);
   };
 
   const { msg } = alerta;
@@ -63,7 +153,11 @@ const ModalEmpleados = ({ agregarEmpleado }: { agregarEmpleado: (empleado: Emple
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center"
-          onClick={() => setIsOpen(false)}
+          onClick={() => {
+            setIsOpen(false);
+            setEditar(false);
+            resetForm();
+          }}
         >
           <div
             className="bg-white p-6 md:py-18 rounded shadow-lg flex flex-col justify-center items-center gap-5 w-1/2"
@@ -79,6 +173,7 @@ const ModalEmpleados = ({ agregarEmpleado }: { agregarEmpleado: (empleado: Emple
                   className="border w-full p-3 mt-2 bg-gray-50 rounded px-4"
                   value={cedula}
                   onChange={(e) => setCedula(e.target.value)}
+                  disabled = { editar }
                 />
               </div>
               <div className="my-5">
@@ -116,8 +211,8 @@ const ModalEmpleados = ({ agregarEmpleado }: { agregarEmpleado: (empleado: Emple
 
               <input
                 type="submit"
-                value="Agregar"
-                className="bg-indigo-700 w-full py-2 px-2 rounded text-white uppercase font-bold mt-5 hover:bg-indigo-800 cursor-pointer"
+                value={editar ? "Actualizar": "Agregar"}
+                className={editar ? "bg-cyan-500 w-full py-2 px-2 rounded text-white uppercase font-bold mt-5 hover:bg-cyan-700 cursor-pointer": "bg-indigo-700 w-full py-2 px-2 rounded text-white uppercase font-bold mt-5 hover:bg-indigo-800 cursor-pointer"}
               />
             </form>
           </div>
