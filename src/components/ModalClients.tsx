@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import Alerta from "./Alerta";
 import Axios from "axios";
 import Swal from "sweetalert2";
+import useAuth from "../hooks/useAuth";
+
 
 type Cliente = {
   cedula:string;
@@ -32,6 +34,14 @@ const ModalClients = ({
   const [email, setEmail] = useState<string>("");
   const [telefono, setTelefono] = useState<string>("");
 
+  const { auth } = useAuth();
+  let isValid = true;
+  if(auth){
+    const { user } = auth;
+    if(user == 'vendedor'){
+      isValid = false;
+    }
+  }
 
   const [alerta, setAlerta] = useState({
     msg: "",
@@ -156,10 +166,10 @@ const ModalClients = ({
       >
         Nuevo Cliente
       </button>
-        <Link 
+        {isValid ?  <Link 
             className="bg-green-500 w-full py-2 px-4 rounded text-white uppercase font-bold mb-5 hover:bg-green-700 md:w-auto" to="/admin/clientesfrecuentes">
             Clientes Frecuentes
-          </Link>
+        </Link> : ''}
       </div>
      
 

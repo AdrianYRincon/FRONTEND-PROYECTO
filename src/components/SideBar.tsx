@@ -7,11 +7,11 @@ const Sidebar = () => {
       <p className="mt-10 text-white">Administra tu Negocio</p>
       <nav className="mt-8">
 
-          <Link 
+          {/* <Link 
             className="px-3 py-4 text-white block hover:bg-slate-500 focus:bg-slate-500"
             to='/admin'>
             Ventas
-          </Link>
+          </Link> */}
           <Link 
             className="px-3 py-4 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
             to="/admin/productos">
@@ -41,6 +41,11 @@ const Sidebar = () => {
             className="px-3 py-4 text-white block hover:bg-slate-500 focus:bg-slate-500"
             to="/admin/serviciosrealizados">
             Registro Servicios Realizados
+          </Link>
+          <Link 
+            className="px-3 py-4 text-white block hover:bg-slate-500 focus:bg-slate-500"
+            to="/">
+            Cerrar sesión
           </Link>
       </nav>
     </aside>

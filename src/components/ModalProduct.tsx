@@ -3,6 +3,8 @@ import Alerta from "./Alerta";
 import Axios from "axios";
 import Swal from 'sweetalert2';
 import { Link } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+
 
 
 type Producto = {
@@ -33,6 +35,16 @@ const ModalProduct = ({
   const [nombre, setNombre] = useState<string>("");
   const [precio, setPrecio] = useState<number>(0);
   const [cantidad, setCantidad] = useState<number>(0);
+
+  const { auth } = useAuth();
+  let isValid = true;
+  if(auth){
+    const { user } = auth;
+    if(user == 'vendedor'){
+      isValid = false;
+    }
+  }
+  
 
   const [alerta, setAlerta] = useState({
     msg: "",
@@ -157,10 +169,11 @@ const ModalProduct = ({
         >
           Agregar Producto
         </button>
-        <Link 
+        {isValid ?  <Link 
             className="bg-orange-500 w-full py-2 px-4 rounded text-white uppercase font-bold mb-5 hover:bg-orange-700 md:w-auto" to="/admin/productosnovendidos">
             Productos sin ventas
-          </Link>
+          </Link> : ''}
+        
       </div>
      
 

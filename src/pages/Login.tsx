@@ -1,7 +1,9 @@
 import { useState } from 'react';
-//import { Link, /*useNavigate*/ } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import imglogin from '../assets/imglogin.jpg';
 import Alerta from '../components/Alerta';
+import useAuth from '../hooks/useAuth';
+
 
 
 const Login = () => {
@@ -11,17 +13,18 @@ const Login = () => {
     error: boolean;
   };
 
-  const [email, setEmail] = useState('');
+  const [user, setUser] = useState('');
   const [password,setPassword] = useState('');
 
   const [alerta, setAlerta] = useState<Alertatype>({ msg: "", error: false });
+  const { setAuth } = useAuth();
+  const navigate = useNavigate();
 
-  //const navigate = useNavigate();
 
   const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if([email,password].includes('')){
+    if([user,password].includes('')){
       setAlerta({
         msg: 'Todos los campos son obligatorios',
         error:true
@@ -30,22 +33,27 @@ const Login = () => {
 
     }
 
-    // try {
-    //   const { data } = await clienteAxios.post('/api', {email,password})
-    //   console.log(data);  
-    //   //debemos guarda el token en localStorage
-    //   localStorage.setItem('token',data.token);
 
-    //   navigate('/admin');
-    // } 
-    // catch (error) {
-    //   setAlerta({
-    //     msg: error.respose.data,
-    //     error:true
-    //   })
-    // }
+    if((user == "admin" && password == "12345") || (user == "vendedor" && password == "00000")){
+      
+      setAlerta({
+        msg: '',
+        error:false
+      })
 
+      setAuth({user,password});
+      navigate('/admin/productos')
 
+    }
+    else{
+      setAlerta({
+        msg: 'Usuario o contraseña incorrectos',
+        error:true
+      })
+      return
+    }
+
+    
   }
 
 
@@ -71,14 +79,14 @@ const Login = () => {
           <form onSubmit={handleSubmit}>
             <div className='my-5'>
               <label className='uppercase text-gray-600 block text-xl font-bold'>
-                Email
+                USER
               </label>
               <input 
-                type='email' 
-                placeholder='Email' 
+                type='text' 
+                placeholder='user' 
                 className='border  w-full p-3 mt-3 bg-gray-50 rounded'
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                value={user}
+                onChange={e => setUser(e.target.value)}
                 />
             </div>
             <div className='my-5'>
@@ -97,12 +105,6 @@ const Login = () => {
             <input type='submit' value='Iniciar Sesión' 
             className='bg-indigo-700 w-full py-3 p-10 rounded-xl text-white uppercase font-bold mt-5 hover:cursor-pointer hover:bg-indigo-800 md:w-auto'/>
           </form>
-          {/* <nav className='mt-7'>
-            <Link 
-              className='block text-center my-5 text-gray-500' to="/forgot-password">
-              Olvide mi contraseña
-            </Link>
-          </nav> */}
         </div>    
     </>
   )
