@@ -8,34 +8,39 @@ const Sidebar = () => {
       <nav className="mt-8">
 
           <Link 
-            className="px-3 py-1 text-white block hover:bg-slate-500 focus:bg-slate-500"
+            className="px-3 py-4 text-white block hover:bg-slate-500 focus:bg-slate-500"
             to='/admin'>
             Ventas
           </Link>
           <Link 
-            className="px-3 py-1 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
+            className="px-3 py-4 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
             to="/admin/productos">
             Productos
           </Link>
           <Link 
-            className="px-3 py-1 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
+            className="px-3 py-4 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
             to="/admin/clientes">
             Clientes
           </Link>
           <Link 
-            className="px-3 py-1 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
+            className="px-3 py-4 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
             to="/admin/vehiculos">
             Vehiculos
           </Link>
           <Link 
-            className="px-3 py-1 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
-            to="/admin/servicios">
-            Servicios en curso
-          </Link>
-          <Link 
-            className="px-3 py-1 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
+            className="px-3 py-4 text-white block hover:bg-slate-500 mt-2 focus:bg-slate-500"
             to="/admin/empleados">
             Empleado
+          </Link>
+          <Link 
+            className="px-3 py-4 text-white block hover:bg-slate-500 focus:bg-slate-500"
+            to="/admin/ventasproductos">
+            Registro Ventas Productos
+          </Link>
+          <Link 
+            className="px-3 py-4 text-white block hover:bg-slate-500 focus:bg-slate-500"
+            to="/admin/serviciosrealizados">
+            Registro Servicios Realizados
           </Link>
       </nav>
     </aside>

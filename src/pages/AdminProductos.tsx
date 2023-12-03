@@ -18,6 +18,8 @@ const AdminProductos = () => {
   const [productos, setProductos] = useState<Array<Producto>>([]);
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
   const [editar, setEditar] = useState(false);
+  const [idBuscar, setIdBuscar] = useState(0);
+
 
   const eliminarProducto = async(id: number) => {
 
@@ -62,6 +64,38 @@ const AdminProductos = () => {
     setProductos(productosApi);
   }
 
+  const buscarProductoPorId = async () => {
+    try {
+
+      const { data } = await Axios.get(
+        `http://localhost:3001/getproducto/${idBuscar}`
+      );
+
+      console.log(data);
+      const productoEncontrado: Producto = {
+        id: data[0][0].pro_id,
+        nombre: data[0][0].pro_nombre,
+        precio: data[0][0].pro_precio,
+        cantidad: data[0][0].pro_cantidad,
+      };
+
+      setProductos([productoEncontrado]);
+    } catch (error: any) {
+      console.log(error);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Producto no encontrado",
+      });
+    }
+  };
+
+  const limpiarBusqueda = () => {
+    getProducts();
+    setIdBuscar(0);
+  };
+
+
   useEffect(()=>{
     getProducts();
   },[]);
@@ -70,6 +104,27 @@ const AdminProductos = () => {
   return (
     <>
       <Title title="Productos" />
+      <div className="flex mb-4">
+        <input
+          type="text"
+          placeholder="Buscar por ID"
+          className="border rounded-l py-2 px-4"
+          value={idBuscar}
+          onChange={(e) => setIdBuscar(parseInt(e.target.value))}
+        />
+        <button
+          className="bg-blue-500 text-white py-2 px-4 rounded-r"
+          onClick={buscarProductoPorId}
+        >
+          Buscar
+        </button>
+        <button
+          className="bg-gray-500 text-white py-2 px-4 rounded-r ml-2"
+          onClick={limpiarBusqueda}
+        >
+          Refresh
+        </button>
+      </div>
       <ModalProduct 
         editar={editar} 
         selectedProduct={selectedProduct} 

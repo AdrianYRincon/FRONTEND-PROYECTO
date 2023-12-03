@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Alerta from "./Alerta";
 import Axios from "axios";
 import Swal from 'sweetalert2';
+import { Link } from "react-router-dom";
 
 
 type Producto = {
@@ -148,13 +149,20 @@ const ModalProduct = ({
   const { msg } = alerta;
 
   return (
-    <>
-      <button
-        className="bg-indigo-700 w-full py-2 px-4 rounded text-white uppercase font-bold mb-5 hover:bg-indigo-800 md:w-auto"
-        onClick={() => setIsOpen(true)}
-      >
-        Agregar Producto
-      </button>
+    <>  
+      <div className="flex justify-between">
+        <button
+          className="bg-indigo-700 w-full py-2 px-4 rounded text-white uppercase font-bold mb-5 hover:bg-indigo-800 md:w-auto"
+          onClick={() => setIsOpen(true)}
+        >
+          Agregar Producto
+        </button>
+        <Link 
+            className="bg-orange-500 w-full py-2 px-4 rounded text-white uppercase font-bold mb-5 hover:bg-orange-700 md:w-auto" to="/admin/productosnovendidos">
+            Productos sin ventas
+          </Link>
+      </div>
+     
 
       {isOpen && (
         <div
