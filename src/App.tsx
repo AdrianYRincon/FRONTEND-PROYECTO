@@ -8,6 +8,7 @@ import Login from './pages/Login';
 
 //Rutas protegidas
 import AdminVentas from './pages/AdminVentas';
+import AdminService from './pages/AdminService';
 import AdminClientes from './pages/AdminClientes';
 import AdminProductos from './pages/AdminProductos';
 import AdminEmpleados from './pages/AdminEmpleados';
@@ -37,6 +38,7 @@ function App() {
 
             <Route path="/admin" element={<RutaProtegida/>}>
               <Route index element = {<AdminVentas/>}/>
+              <Route path="ventasservicios" element = {<AdminService/>}/>
               <Route path="productos" element = {<AdminProductos/>}/>
               <Route path="clientes" element = {<AdminClientes/>}/>
               <Route path="vehiculos" element = {<AdminVehiculos/>}/>

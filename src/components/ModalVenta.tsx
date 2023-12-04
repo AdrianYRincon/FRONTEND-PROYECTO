@@ -7,38 +7,34 @@ import { Link } from "react-router-dom";
 
 
 
-type Servicio = {
-  id:number;
-  placa:string;
-  serId:number;
-  cedula:string;
-  facId:number;
-  precio:number;
-  cantidad:number
+type Venta = {
+  det_id:number;
+  fac_id: number;
+  pro_id: number;
+  precio: number;
+  cantidad: number;
 };
 
-const ModalService = ({
+const ModalVenta = ({
   editar,
-  selectedService,
+  selectedVenta,
   setEditar,
-  getServices
+  getVentas
 }: {  
   editar: boolean ,
-  selectedService : Servicio | null,
+  selectedVenta : Venta | null,
   setEditar: Function,
-  getServices: Function
+  getVentas: Function
 }) => {
   
   
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const [id, setId] = useState<number>(0);
-  const [serId, setSerId] = useState<number>(0);
+  const [detId, setDetId] = useState<number>(0);
   const [facId, setFacId] = useState<number>(0);
-  const [cantidad, setCantidad] = useState<number>(0);
+  const [proId, setProId] = useState<number>(0);
   const [precio, setPrecio] = useState<number>(0);
-  const [placa, setPlaca] = useState<string>("");
-  const [cedula, setCedula] = useState<string>("");
+  const [cantidad, setCantidad] = useState<number>(0);
 
 
   const [alerta, setAlerta] = useState({
@@ -48,25 +44,20 @@ const ModalService = ({
 
 
   useEffect(()=>{
-    if (editar && selectedService) {
+    if (editar && selectedVenta) {
       setIsOpen(true);
-      setId(selectedService.id);
-      setPlaca(selectedService.placa);
-      setSerId(selectedService.serId);
-      setCedula(selectedService.cedula);
-      setFacId(selectedService.facId);
-      setPrecio(selectedService.precio);
-      setCantidad(selectedService.cantidad);
+      setDetId(selectedVenta.det_id);
+      setFacId(selectedVenta.fac_id);
+      setProId(selectedVenta.pro_id);
+      setPrecio(selectedVenta.precio);
+      setCantidad(selectedVenta.cantidad);
     }
-  },[editar, selectedService])
+  },[editar, selectedVenta])
 
 
   const resetForm = ()=>{
-    setId(0);
-    setPlaca("");
-    setSerId(0);
-    setCedula("");
     setFacId(0);
+    setProId(0);
     setPrecio(0);
     setCantidad(0);
 
@@ -77,7 +68,7 @@ const ModalService = ({
   const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if ([facId,precio,cantidad,serId].includes(0) || [placa,cedula].includes("")) {
+    if ([facId,proId,precio,cantidad].includes(0)) {
       setAlerta({
         msg: "Todos los campos son obligatorios",
         error: true,
@@ -85,26 +76,23 @@ const ModalService = ({
       return;
     }
 
-    console.log(placa,serId,cedula,facId,precio,cantidad);
-
 
     if(!editar){
-      //intentamos agregar una nuevo servicio
+      //intentamos agregar una nueva venta
       try {
-        await Axios.post("http://localhost:3001/addservice",{
-          placa,
-          serId,
-          cedula,
+        await Axios.post("http://localhost:3001/addventa",{
           facId,
+          proId,
           precio,
           cantidad
         });
-        getServices();
+
+        getVentas();
   
         Swal.fire({
         position: "center",
         icon: "success",
-        title: "Servicio Agregado correctamente",
+        title: "Venta Agregada correctamente",
         showConfirmButton: false,
         timer: 2000
         });
@@ -120,24 +108,22 @@ const ModalService = ({
   
     }
     else {
-      //intentamos actualizar un servicio
+      //intentamos actualizar una ventaS
       try {
-        await Axios.put("http://localhost:3001/updateservice",{
-          id,
-          placa,
-          serId,
-          cedula,
+        await Axios.put("http://localhost:3001/updateventa",{
+          detId,
           facId,
+          proId,
           precio,
           cantidad
         });
 
-        getServices();
+        getVentas();
   
         Swal.fire({
         position: "center",
         icon: "success",
-        title: "Servicio actualizada correctamente",
+        title: "Venta actualizada correctamente",
         showConfirmButton: false,
         timer: 2000
         });
@@ -174,11 +160,11 @@ const ModalService = ({
           className="bg-indigo-700 w-full py-2 px-4 rounded text-white uppercase font-bold mb-5 hover:bg-indigo-800 md:w-auto"
           onClick={() => setIsOpen(true)}
         >
-          Agregar Servicio
+          Agregar Venta
         </button>
         <Link 
-            className="bg-orange-500 w-full py-2 px-4 rounded text-white uppercase font-bold mb-5 hover:bg-orange-700 md:w-auto" to="/admin/serviciosrealizados">
-            Ver Registros Servicios
+            className="bg-orange-500 w-full py-2 px-4 rounded text-white uppercase font-bold mb-5 hover:bg-orange-700 md:w-auto" to="/admin/ventasproductos">
+            Ver Registro Ventas
           </Link>
       </div>
      
@@ -199,46 +185,24 @@ const ModalService = ({
             {msg && <Alerta alerta={alerta} />}
             <form onSubmit={handleSubmit} className="w-full">
               <div className="my-5">
-                <label className="uppercase text-gray-600 block text-lg font-bold">Placa</label>
-                <input
-                  type="text"
-                  placeholder="placa"
-                  className="border w-full p-3 mt-2 bg-gray-50 rounded px-4"
-                  value={placa}
-                  onChange={(e) =>setPlaca(e.target.value)}
-                  disabled = { editar }
-                />
-              </div>
-              <div className="my-5">
-                <label className="uppercase text-gray-600 block text-lg font-bold">Servicio id</label>
-                <input
-                  type="number"
-                  placeholder="servicio id"
-                  className="border w-full p-3 mt-2 bg-gray-50 rounded px-4"
-                  value={serId}
-                  onChange={(e) =>setSerId(Number(e.target.value))}
-                  disabled = { editar }
-                />
-              </div>
-              <div className="my-5">
-                <label className="uppercase text-gray-600 block text-lg font-bold">Cedula Empleado</label>
-                <input
-                  type="text"
-                  placeholder="cedula"
-                  className="border w-full p-3 mt-2 bg-gray-50 rounded px-4"
-                  value={cedula}
-                  onChange={(e) =>setCedula(e.target.value)}
-                  disabled = { editar }
-                />
-              </div>
-              <div className="my-5">
-                <label className="uppercase text-gray-600 block text-lg font-bold">Factura id</label>
+                <label className="uppercase text-gray-600 block text-lg font-bold">factura id</label>
                 <input
                   type="number"
                   placeholder="factura id"
                   className="border w-full p-3 mt-2 bg-gray-50 rounded px-4"
                   value={facId}
-                  onChange={(e) => setFacId(Number(e.target.value))}
+                  onChange={(e) =>setFacId(Number(e.target.value))}
+                  disabled = { editar }
+                />
+              </div>
+              <div className="my-5">
+                <label className="uppercase text-gray-600 block text-lg font-bold">producto id</label>
+                <input
+                  type="number"
+                  placeholder="producto id"
+                  className="border w-full p-3 mt-2 bg-gray-50 rounded px-4"
+                  value={proId}
+                  onChange={(e) => setProId(Number(e.target.value))}
                   disabled = { editar }
                 />
               </div>
@@ -280,4 +244,4 @@ const ModalService = ({
   );
 };
 
-export default ModalService;
+export default ModalVenta;
